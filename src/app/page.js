@@ -2,18 +2,22 @@
 
 import { useState, useRef } from "react";
 import axios from "axios";
-import { Upload } from "lucide-react"; // Import upload icon from Lucide
+import { Upload } from "lucide-react";
 
 export default function Home() {
   const [image, setImage] = useState(null);
   const [preview, setPreview] = useState(null);
   const [outputImage, setOutputImage] = useState(null);
   const [loading, setLoading] = useState(false);
-  const fileInputRef = useRef(null); // Ref for the hidden file input
+  const fileInputRef = useRef(null);
+
+  // 🚀 Render Flask API URL
+  const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
 
   const handleFileChange = (event) => {
     const file = event.target.files[0];
     if (!file) return;
+
     setImage(file);
     setPreview(URL.createObjectURL(file));
     setOutputImage(null);
@@ -27,35 +31,27 @@ export default function Home() {
 
     setLoading(true);
 
-    // Timeout to prevent infinite loading
-    const uploadTimeout = setTimeout(() => {
-      setLoading(false);
-      alert("Server timeout! Try again.");
-    }, 10000); // 10 seconds timeout
-
     const formData = new FormData();
     formData.append("file", image);
 
     try {
-      // Updated API URL to Render's deployment
-      const response = await axios.post("https://airport-detection-api.onrender.com/upload/", formData, {
+      const response = await axios.post(`${API_BASE_URL}/upload/`, formData, {
         headers: { "Content-Type": "multipart/form-data" },
       });
 
-      clearTimeout(uploadTimeout); // Clear timeout if successful
-
-      console.log("API Response:", response.data); // Debugging
-
       if (response.data.filename) {
-        setOutputImage(`https://airport-detection-api.onrender.com/outputs/${response.data.filename}`);
+        setOutputImage(`${API_BASE_URL}/outputs/${response.data.filename}`);
       } else {
-        alert("Detection failed.");
+        alert("Object detection failed. Try again.");
       }
     } catch (error) {
       console.error("Error uploading file:", error);
-      alert("An error occurred.");
+      alert("Server error! Please try again later.");
     } finally {
       setLoading(false);
+      setImage(null); // Clear selected image
+      setPreview(null); // Reset preview
+      fileInputRef.current.value = ""; // Reset file input field
     }
   };
 
@@ -128,7 +124,7 @@ export default function Home() {
             src={outputImage}
             alt="Detected"
             className="w-auto h-auto p-6 opacity-0 transition-opacity duration-1000 ease-in-out"
-            onLoad={(e) => (e.target.style.opacity = 1)} // Smooth unblur effect
+            onLoad={(e) => (e.target.style.opacity = 1)}
           />
         </div>
       )}
