@@ -27,29 +27,36 @@ export default function Home() {
 
     setLoading(true);
 
-    const randomDelay = Math.floor(Math.random() * 2000) + 1000;
+    // Timeout to prevent infinite loading
+    const uploadTimeout = setTimeout(() => {
+      setLoading(false);
+      alert("Server timeout! Try again.");
+    }, 10000); // 10 seconds timeout
 
-    setTimeout(async () => {
-      const formData = new FormData();
-      formData.append("file", image);
+    const formData = new FormData();
+    formData.append("file", image);
 
-      try {
-        const response = await axios.post("http://127.0.0.1:8000/upload/", formData, {
-          headers: { "Content-Type": "multipart/form-data" },
-        });
+    try {
+      // Updated API URL to Render's deployment
+      const response = await axios.post("https://airport-detection-api.onrender.com/upload/", formData, {
+        headers: { "Content-Type": "multipart/form-data" },
+      });
 
-        if (response.data.filename) {
-          setOutputImage(`http://127.0.0.1:8000/outputs/${response.data.filename}`);
-        } else {
-          alert("Detection failed.");
-        }
-      } catch (error) {
-        console.error("Error uploading file:", error);
-        alert("An error occurred.");
-      } finally {
-        setLoading(false);
+      clearTimeout(uploadTimeout); // Clear timeout if successful
+
+      console.log("API Response:", response.data); // Debugging
+
+      if (response.data.filename) {
+        setOutputImage(`https://airport-detection-api.onrender.com/outputs/${response.data.filename}`);
+      } else {
+        alert("Detection failed.");
       }
-    }, randomDelay);
+    } catch (error) {
+      console.error("Error uploading file:", error);
+      alert("An error occurred.");
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
