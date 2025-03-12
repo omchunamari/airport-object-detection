@@ -123,7 +123,7 @@ export default function Home() {
           <img
             src={outputImage}
             alt="Detected"
-            className="w-auto h-auto p-6 opacity-0 transition-opacity duration-1000 ease-in-out"
+            className="w-auto h-auto p-6 opacity-0 transition-opacity duration-1100 ease-in-out"
             onLoad={(e) => (e.target.style.opacity = 1)}
           />
         </div>
