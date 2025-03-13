@@ -12,7 +12,7 @@ export default function Home() {
   const fileInputRef = useRef(null);
 
   // Flask API URL
-  const API_BASE_URL = "https://6d11-2402-3a80-6f3-301-3ca6-7117-1653-aa12.ngrok-free.app";
+  const API_BASE_URL = "https://3bdf-2402-3a80-6f3-301-dca3-1979-fa5c-c5b6.ngrok-free.app ";
 
   const handleFileChange = (event) => {
     const file = event.target.files[0];
