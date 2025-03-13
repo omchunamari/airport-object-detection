@@ -12,7 +12,7 @@ export default function Home() {
   const fileInputRef = useRef(null);
 
   // Flask API URL
-  const API_BASE_URL = NEXT_PUBLIC_API_BASE_URL;
+  const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
 
   const handleFileChange = (event) => {
     const file = event.target.files[0];
