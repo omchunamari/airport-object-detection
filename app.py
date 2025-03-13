@@ -13,7 +13,7 @@ CORS(app)  # Enable CORS to allow frontend to communicate
 ssl._create_default_https_context = ssl._create_unverified_context
 
 # ✅ Load YOLOv5 model safely
-MODEL_PATH = "/Users/omchunamari/Desktop/Final Year Project/yolov5best.pt"
+MODEL_PATH = "yolov5best.pt"
 model = torch.hub.load(
     "ultralytics/yolov5",
     "custom",
