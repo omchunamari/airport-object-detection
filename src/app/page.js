@@ -11,8 +11,8 @@ export default function Home() {
   const [loading, setLoading] = useState(false);
   const fileInputRef = useRef(null);
 
-  // 🚀 Render Flask API URL
-  const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
+  // Flask API URL
+  const API_BASE_URL = "https://6d11-2402-3a80-6f3-301-3ca6-7117-1653-aa12.ngrok-free.app";
 
   const handleFileChange = (event) => {
     const file = event.target.files[0];
@@ -20,7 +20,7 @@ export default function Home() {
 
     setImage(file);
     setPreview(URL.createObjectURL(file));
-    setOutputImage(null);
+    setOutputImage(null); // Reset detected image
   };
 
   const handleUpload = async () => {
@@ -32,32 +32,27 @@ export default function Home() {
     setLoading(true);
 
     const formData = new FormData();
-    formData.append("file", image);
+    formData.append("image", image); // ✅ Match Flask's expected key
 
     try {
-      const response = await axios.post(`${API_BASE_URL}/upload/`, formData, {
+      const response = await axios.post(`${API_BASE_URL}/detect`, formData, {
         headers: { "Content-Type": "multipart/form-data" },
+        responseType: "blob", // ✅ Receive image as a file
       });
 
-      if (response.data.filename) {
-        setOutputImage(`${API_BASE_URL}/outputs/${response.data.filename}`);
-      } else {
-        alert("Object detection failed. Try again.");
-      }
+      const imageUrl = URL.createObjectURL(response.data);
+      setOutputImage(imageUrl);
     } catch (error) {
       console.error("Error uploading file:", error);
       alert("Server error! Please try again later.");
     } finally {
       setLoading(false);
-      setImage(null); // Clear selected image
-      setPreview(null); // Reset preview
-      fileInputRef.current.value = ""; // Reset file input field
     }
   };
 
   return (
     <div className="min-h-screen flex flex-col items-center justify-center bg-gray-900 text-white">
-      <h1 className="text-3xl font-bold mt-10 mb-6">Airport Object Detection</h1>
+      <h1 className="text-4xl font-bold mt-8 mb-6">Airport Object Detection</h1>
 
       {/* Hidden File Input */}
       <input
@@ -76,22 +71,42 @@ export default function Home() {
         <Upload className="h-5 w-5 mr-2" /> Choose File
       </button>
 
-      {preview && (
-        <div className="mb-4">
-          <p className="text-2xl px-6 text-gray-400">Selected Image:</p>
-          <img src={preview} alt="Preview" className="w-auto h-auto max-w-[50vw] max-h-[50vw] p-6" />
-        </div>
-      )}
+      {/* Full-Page Image Display */}
+      <div className="flex flex-col md:flex-row items-center justify-center w-full mt-6 gap-6">
+        {preview && (
+          <div className="text-center w-full flex flex-col items-center">
+            <p className="text-xl text-gray-400 mb-2">Selected Image</p>
+            <img
+              src={preview}
+              alt="Preview"
+              className="w-full md:w-[45vw] h-auto max-h-[80vh] object-contain border-4 border-gray-600 p-4 rounded-lg"
+            />
+          </div>
+        )}
 
+        {outputImage && (
+          <div className="text-center w-full flex flex-col items-center">
+            <p className="text-xl text-gray-400 mb-2">Detected Image</p>
+            <img
+              src={outputImage}
+              alt="Detected"
+              className="w-full md:w-[45vw] h-auto max-h-[80vh] object-contain border-4 border-blue-600 p-4 rounded-lg opacity-0 transition-opacity duration-1000 ease-in-out"
+              onLoad={(e) => (e.target.style.opacity = 1)}
+            />
+          </div>
+        )}
+      </div>
+
+      {/* Detect Button */}
       <button
         onClick={handleUpload}
         disabled={loading}
-        className="px-6 py-2 bg-blue-500 hover:bg-blue-600 rounded-lg text-white font-semibold flex items-center"
+        className="mt-6 px-8 py-3 bg-blue-500 hover:bg-blue-600 rounded-lg text-white font-semibold flex items-center text-lg"
       >
         {loading ? (
           <>
             <svg
-              className="animate-spin h-5 w-5 mr-2 text-white"
+              className="animate-spin h-6 w-6 mr-2 text-white"
               xmlns="http://www.w3.org/2000/svg"
               fill="none"
               viewBox="0 0 24 24"
@@ -116,18 +131,6 @@ export default function Home() {
           "Detect"
         )}
       </button>
-
-      {outputImage && (
-        <div className="mt-6">
-          <p className="text-2xl text-gray-400 px-6">Detected Image:</p>
-          <img
-            src={outputImage}
-            alt="Detected"
-            className="w-auto h-auto p-6 opacity-0 transition-opacity duration-1100 ease-in-out"
-            onLoad={(e) => (e.target.style.opacity = 1)}
-          />
-        </div>
-      )}
     </div>
   );
 }
