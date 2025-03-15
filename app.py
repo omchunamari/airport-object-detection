@@ -88,12 +88,15 @@ def detect():
     return send_file(output_path, mimetype="image/jpeg")
 
 if __name__ == "__main__":
+    host = "0.0.0.0"
+    port = 4000
     print("🚀 Starting Flask app on CPU Core 0...")
 
     if os.name == "nt":
         from waitress import serve
-        print("🟢 Running on Windows using Waitress...")
-        serve(app, host="0.0.0.0", port=4000, threads=1)
+        print(f"🟢 Running on Windows using Waitress...")
+        print(f"✅ Hosted on: http://127.0.0.1:{port}/")
+        serve(app, host=host, port=port, threads=1)
     else:
         import gunicorn.app.base
 
@@ -114,8 +117,10 @@ if __name__ == "__main__":
 
         cpu_cores = multiprocessing.cpu_count()
         print(f"🟢 Running on Linux/macOS using Gunicorn ({cpu_cores} worker(s))...")
+        print(f"✅ Hosted on: http://127.0.0.1:{port}/")
+        
         options = {
-            "bind": "0.0.0.0:4000",
+            "bind": f"{host}:{port}",
             "workers": 1,  # Ensures only 1 worker is used
         }
         StandaloneGunicornApp(app, options).run()
