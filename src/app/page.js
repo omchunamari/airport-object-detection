@@ -18,6 +18,18 @@ export default function Home() {
     const file = event.target.files[0];
     if (!file) return;
 
+    // ✅ Check file type (Only images allowed)
+    if (!file.type.startsWith("image/")) {
+      alert("Only image files are allowed!");
+      return;
+    }
+
+    // ✅ Check file size (Max 8MB)
+    if (file.size > 8 * 1024 * 1024) {
+      alert("File size must be 8MB or less!");
+      return;
+    }
+
     setImage(file);
     setPreview(URL.createObjectURL(file));
     setOutputImage(null); // Reset detected image

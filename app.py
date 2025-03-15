@@ -12,15 +12,19 @@ CORS(app)
 # 🔥 Disable SSL Verification for Torch Hub (Fixes SSL errors)
 ssl._create_default_https_context = ssl._create_unverified_context
 
-# ✅ Load YOLOv5 model safely
+# ✅ Explicitly Disable CUDA (Force CPU)
+os.environ["CUDA_VISIBLE_DEVICES"] = "-1"  # ❌ Disable GPU
+device = torch.device("cpu")  # ✅ Force CPU usage
+
+# ✅ Load YOLOv5 model on CPU
 MODEL_PATH = "windowsyolov5best.pt"
 model = torch.hub.load(
     "ultralytics/yolov5",
     "custom",
     path=MODEL_PATH,
     force_reload=True,
-    trust_repo=True,  # Avoid SSL warnings
-)
+    trust_repo=True
+).to(device)  # ✅ Force running on CPU
 
 # Ensure directories exist
 os.makedirs("uploads", exist_ok=True)
@@ -32,6 +36,13 @@ def detect():
         return jsonify({"error": "No file uploaded"}), 400
 
     file = request.files["image"]
+    
+    # ✅ Validate file size (Max 8MB)
+    if len(file.read()) > 8 * 1024 * 1024:
+        return jsonify({"error": "File size exceeds 8MB limit"}), 400
+
+    file.seek(0)  # Reset file pointer after reading
+    
     filename = file.filename
     image_path = os.path.join("uploads", filename)
     output_path = os.path.join("outputs", filename)
@@ -41,9 +52,8 @@ def detect():
 
     image = Image.open(image_path).convert("RGB")  # ✅ Convert image to RGB
 
-    # 🔥 Run YOLOv5 inference with correct AMP usage
-    with torch.amp.autocast("cuda"):
-        results = model(image)
+    # 🔥 Run YOLOv5 inference on CPU only
+    results = model(image)
 
     # 🖼️ Render bounding boxes
     results.render()
