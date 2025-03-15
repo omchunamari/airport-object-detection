@@ -20,13 +20,18 @@ pip install -r requirements.txt
 ```
 
 ### Python Dependencies
-- `torch`
 - `flask`
 - `flask-cors`
-- `PIL` (Pillow)
-- `numpy`
-- `opencv-python`
+- `pillow`
+- `torch`
+- `torchvision`
 - `ultralytics`
+- `opencv-python`
+- `gitpython`
+- `setuptools`
+- `gunicorn`
+- `waitress`
+- `psutil`
 
 ## 🚀 Setup & Installation
 
@@ -36,19 +41,14 @@ git clone https://github.com/omchunamari/airport-object-detection.git
 cd airport-object-detection
 ```
 
-### 2️⃣ Model File Selection
-- **Windows users** should use `windowsyolov5best.pt`.
-- **Linux/macOS users** should use `yolov5best.pt`.
-- Ensure the correct model file is set in `app.py`.
-
-### 3️⃣ Run the Flask Backend
+### 2️⃣ Run the Flask Backend
 ```bash
 python app.py
 ```
 
 By default, the backend runs on port **4000**.
 
-### 4️⃣ Set Up the Frontend
+### 3️⃣ Set Up the Frontend
 Create a `.env.local` file in the project root and add:
 ```bash
 NEXT_PUBLIC_API_BASE_URL=http://127.0.0.1:4000
@@ -60,7 +60,7 @@ npm install
 npm run dev
 ```
 
-### 5️⃣ Run the Detection
+### 4️⃣ Run the Detection
 - Upload an image file (max size 8MB).
 - Only image formats are allowed.
 - The detected objects will be displayed on the webpage.
