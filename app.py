@@ -7,7 +7,7 @@ import io
 from flask_cors import CORS  # Import CORS for frontend integration
 
 app = Flask(__name__)
-CORS(app)  # Enable CORS to allow frontend to communicate
+CORS(app)  
 
 # 🔥 Disable SSL Verification for Torch Hub (Fixes SSL errors)
 ssl._create_default_https_context = ssl._create_unverified_context
