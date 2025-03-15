@@ -8,3 +8,5 @@ opencv-python
 gitpython
 setuptools
 gunicorn
+waitress
+psutil

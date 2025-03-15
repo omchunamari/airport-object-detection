@@ -2,9 +2,11 @@ from flask import Flask, request, jsonify, send_file
 import torch
 import os
 import ssl
+import sys
 from PIL import Image
-import io
+import psutil
 from flask_cors import CORS  # Import CORS for frontend integration
+import multiprocessing
 
 app = Flask(__name__)
 CORS(app)  
@@ -26,9 +28,27 @@ model = torch.hub.load(
     trust_repo=True
 ).to(device)  # ✅ Force running on CPU
 
+# ✅ Set process affinity to use only CPU Core 0 (Windows only)
+if os.name == "nt":
+    p = psutil.Process()
+    p.cpu_affinity([0])
+
 # Ensure directories exist
 os.makedirs("uploads", exist_ok=True)
 os.makedirs("outputs", exist_ok=True)
+
+def print_system_stats():
+    """ Print system stats when image is detected """
+    cpu_usage = psutil.cpu_percent(interval=1)
+    memory = psutil.virtual_memory()
+    disk = psutil.disk_usage('/')
+
+    print("\n===== System Stats =====")
+    print(f"CPU Usage: {cpu_usage}% (Core 0 only)" if os.name == "nt" else f"CPU Usage: {cpu_usage}%")
+    print(f"Memory Usage: {memory.percent}%")
+    print(f"Available RAM: {memory.available / (1024 ** 3):.2f} GB")
+    print(f"Disk Usage: {disk.percent}%")
+    print("========================\n")
 
 @app.route("/detect", methods=["POST"])
 def detect():
@@ -62,7 +82,40 @@ def detect():
     detected_image = Image.fromarray(results.ims[0])
     detected_image.save(output_path, format="JPEG")
     
+    # 📊 Display system stats only when detection occurs
+    print_system_stats()
+
     return send_file(output_path, mimetype="image/jpeg")
 
 if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=4000, debug=True)  # ✅ Allow external access
+    print("🚀 Starting Flask app on CPU Core 0...")
+
+    if os.name == "nt":
+        from waitress import serve
+        print("🟢 Running on Windows using Waitress...")
+        serve(app, host="0.0.0.0", port=4000, threads=1)
+    else:
+        import gunicorn.app.base
+
+        class StandaloneGunicornApp(gunicorn.app.base.BaseApplication):
+            """ Gunicorn application to run Flask inside Python script """
+
+            def __init__(self, app, options=None):
+                self.options = options or {}
+                self.application = app
+                super().__init__()
+
+            def load_config(self):
+                for key, value in self.options.items():
+                    self.cfg.set(key, value)
+
+            def load(self):
+                return self.application
+
+        cpu_cores = multiprocessing.cpu_count()
+        print(f"🟢 Running on Linux/macOS using Gunicorn ({cpu_cores} worker(s))...")
+        options = {
+            "bind": "0.0.0.0:4000",
+            "workers": 1,  # Ensures only 1 worker is used
+        }
+        StandaloneGunicornApp(app, options).run()
