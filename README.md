@@ -1,36 +1,73 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
+# Airport Object Detection
 
-## Getting Started
+This project is an AI-powered object detection system for airport runways using YOLOv5. The system detects objects such as aircraft, baggage, and airport vehicles.
 
-First, run the development server:
+## 📌 Features
+- Uses YOLOv5 for object detection.
+- Supports Windows, Linux, and MacOS with the appropriate model file.
+- Built using Flask for the backend and Next.js for the frontend.
+
+## 🛠️ Requirements
+- Python 3.10
+- Node.js (for Next.js frontend)
+- pip (Python package manager)
+
+## 📦 Dependencies
+Install the required Python libraries using:
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+pip install -r requirements.txt
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+### Python Dependencies
+- `torch`
+- `flask`
+- `flask-cors`
+- `PIL` (Pillow)
+- `numpy`
+- `opencv-python`
+- `ultralytics`
 
-You can start editing the page by modifying `app/page.js`. The page auto-updates as you edit the file.
+## 🚀 Setup & Installation
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+### 1️⃣ Clone Repository
+```bash
+git clone https://github.com/omchunamari/airport-object-detection.git
+cd airport-object-detection
+```
 
-## Learn More
+### 2️⃣ Model File Selection
+- **Windows users** should use `windowsyolov5best.pt`.
+- **Linux/macOS users** should use `yolov5best.pt`.
+- Ensure the correct model file is set in `app.py`.
 
-To learn more about Next.js, take a look at the following resources:
+### 3️⃣ Run the Flask Backend
+```bash
+python app.py
+```
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+By default, the backend runs on port **4000**.
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+### 4️⃣ Set Up the Frontend
+Create a `.env.local` file in the project root and add:
+```bash
+NEXT_PUBLIC_API_BASE_URL=http://127.0.0.1:4000
+```
 
-## Deploy on Vercel
+Then, install frontend dependencies and start the Next.js app:
+```bash
+npm install
+npm run dev
+```
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+### 5️⃣ Run the Detection
+- Upload an image file (max size 8MB).
+- Only image formats are allowed.
+- The detected objects will be displayed on the webpage.
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## 🖼️ Example Output
+After uploading an image, the system will return the processed image with detected objects.
+
+---
+
+💡 **For issues or contributions, feel free to open a PR!** 🚀

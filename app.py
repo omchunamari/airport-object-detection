@@ -17,7 +17,7 @@ os.environ["CUDA_VISIBLE_DEVICES"] = "-1"  # ❌ Disable GPU
 device = torch.device("cpu")  # ✅ Force CPU usage
 
 # ✅ Load YOLOv5 model on CPU
-MODEL_PATH = "windowsyolov5best.pt"
+MODEL_PATH = "windowsyolov5best.pt" if os.name == "nt" else "yolov5best.pt"
 model = torch.hub.load(
     "ultralytics/yolov5",
     "custom",
