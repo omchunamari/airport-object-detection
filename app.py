@@ -11,14 +11,14 @@ import multiprocessing
 app = Flask(__name__)
 CORS(app)  
 
-# 🔥 Disable SSL Verification for Torch Hub (Fixes SSL errors)
+#  Disable SSL Verification for Torch Hub (Fixes SSL errors)
 ssl._create_default_https_context = ssl._create_unverified_context
 
-# ✅ Explicitly Disable CUDA (Force CPU)
+#  Explicitly Disable CUDA (Force CPU)
 os.environ["CUDA_VISIBLE_DEVICES"] = "-1"  # ❌ Disable GPU
-device = torch.device("cpu")  # ✅ Force CPU usage
+device = torch.device("cpu")  #  Force CPU usage
 
-# ✅ Load YOLOv5 model on CPU
+#  Load YOLOv5 model on CPU
 MODEL_PATH = "windowsyolov5best.pt" if os.name == "nt" else "yolov5best.pt"
 model = torch.hub.load(
     "ultralytics/yolov5",
@@ -26,9 +26,9 @@ model = torch.hub.load(
     path=MODEL_PATH,
     force_reload=True,
     trust_repo=True
-).to(device)  # ✅ Force running on CPU
+).to(device)  #  Force running on CPU
 
-# ✅ Set process affinity to use only CPU Core 0 (Windows only)
+#  Set process affinity to use only CPU Core 0 (Windows only)
 if os.name == "nt":
     p = psutil.Process()
     p.cpu_affinity([0])
@@ -57,7 +57,7 @@ def detect():
 
     file = request.files["image"]
     
-    # ✅ Validate file size (Max 8MB)
+    #  Validate file size (Max 8MB)
     if len(file.read()) > 8 * 1024 * 1024:
         return jsonify({"error": "File size exceeds 8MB limit"}), 400
 
@@ -67,22 +67,22 @@ def detect():
     image_path = os.path.join("uploads", filename)
     output_path = os.path.join("outputs", filename)
     
-    # ✅ Save uploaded image
+    #  Save uploaded image
     file.save(image_path)
 
-    image = Image.open(image_path).convert("RGB")  # ✅ Convert image to RGB
+    image = Image.open(image_path).convert("RGB")  #  Convert image to RGB
 
     # 🔥 Run YOLOv5 inference on CPU only
     results = model(image)
 
-    # 🖼️ Render bounding boxes
+    #  Render bounding boxes
     results.render()
     
-    # ✅ Save detected image
+    #  Save detected image
     detected_image = Image.fromarray(results.ims[0])
     detected_image.save(output_path, format="JPEG")
     
-    # 📊 Display system stats only when detection occurs
+    #  Display system stats only when detection occurs
     print_system_stats()
 
     return send_file(output_path, mimetype="image/jpeg")
